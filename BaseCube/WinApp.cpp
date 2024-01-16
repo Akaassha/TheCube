@@ -1,6 +1,7 @@
 #include "WinApp.h"
 #include "Vector3D.h"
 #include "Cube.h"
+#include "Line.h"
 #include "Canvas.h"
 
 static HWND WindowHandle;
@@ -58,20 +59,31 @@ void WinApp::Run()
 	const int cube_side_size = 25;
 
 	Cube* cube = new Cube(cube_location, cube_side_size);
+	Cube* cube1 = new Cube(Vector3D(250, 150, 0), cube_side_size);
+	Cube* cube2 = new Cube(Vector3D(350, 150, 0), cube_side_size);
 	Canvas canvas(GetWindowHandle());
 
-	cube->Rotate(25.0f, Axis::Y);
-	cube->Rotate(25.0f, Axis::Z);
-	canvas.Draw(cube);
+	//cube->Rotate(25.0f, Axis::Y);
+	//cube->Rotate(25.0f, Axis::Z);
+	//canvas.Draw(cube);
+
+	//Line line(Vector3D{10, 10, 10}, Vector3D{100, 100, 100});
+	//line.Draw(canvas);
 
 	while (true)
 	{
 		InvalidateRect(GetWindowHandle(), NULL, TRUE);
-		cube->Rotate(0.05f, Axis::Y);
-		cube->Rotate(0.05f, Axis::Z);
-		cube->Rotate(0.05f, Axis::X);
+		//line.Rotate(Vector3D{1, 1, 1});
+		//line.Draw(canvas);
+
+		cube->Rotate(Vector3D{ 0, 0.1, 0.1 });
+		cube->SetScale(Vector3D{ 100, 100, 100 });
+		cube1->Rotate(Vector3D{ 0, 0.1, 0.1 });
+		cube2->Rotate(Vector3D{ 0, 0.1, 0.1 });
 
 		canvas.Draw(cube);
+		canvas.Draw(cube1);
+		canvas.Draw(cube2);
 
 		Sleep(50);
 

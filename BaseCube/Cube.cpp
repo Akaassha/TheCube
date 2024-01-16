@@ -1,73 +1,79 @@
 #include "Cube.h"
 #include "Canvas.h"
+#include "Line.h"
 
-Cube::Cube(Vector3D center, int size) : center{center}, size{size}
+Cube::Cube(Vector3D center, int size) : location{center}, rotation{0, 0, 0}
 {
-	size /= 0.5f;
-	corners.push_back(Vector3D(center.x + size, center.y + size, center.z + size));
-	corners.push_back(Vector3D(center.x + size, center.y - size, center.z + size));
-	corners.push_back(Vector3D(center.x - size, center.y - size, center.z + size));
-	corners.push_back(Vector3D(center.x - size, center.y + size, center.z + size));
-	corners.push_back(Vector3D(center.x + size, center.y + size, center.z - size));
-	corners.push_back(Vector3D(center.x + size, center.y - size, center.z - size));
-	corners.push_back(Vector3D(center.x - size, center.y - size, center.z - size));
-	corners.push_back(Vector3D(center.x - size, center.y + size, center.z - size));
-
-	rotated_corners.insert(rotated_corners.begin(), corners.begin(), corners.end());
-
+	scale.x = size;
+	scale.y = size;
+	scale.z = size;
 }
 
 void Cube::Draw(Canvas canvas)
 {
-	MoveToEx(canvas.canvas_device, rotated_corners[3].x, rotated_corners[3].y, &canvas.LastDrawPosition);
-	LineTo(canvas.canvas_device, rotated_corners[0].x, rotated_corners[0].y);
-	LineTo(canvas.canvas_device, rotated_corners[1].x, rotated_corners[1].y);
-	LineTo(canvas.canvas_device, rotated_corners[2].x, rotated_corners[2].y);
-	LineTo(canvas.canvas_device, rotated_corners[3].x, rotated_corners[3].y);
+	float half_size_x = scale.x / 2;
+	float half_size_y = scale.y / 2;
+	float half_size_z = scale.z / 2;
+	std::vector<Vector3D> points;
 
-	MoveToEx(canvas.canvas_device, rotated_corners[7].x, rotated_corners[7].y, &canvas.LastDrawPosition);
-	LineTo(canvas.canvas_device, rotated_corners[4].x, rotated_corners[4].y);
-	LineTo(canvas.canvas_device, rotated_corners[5].x, rotated_corners[5].y);
-	LineTo(canvas.canvas_device, rotated_corners[6].x, rotated_corners[6].y);
-	LineTo(canvas.canvas_device, rotated_corners[7].x, rotated_corners[7].y);
+	points.push_back(Vector3D{ +1 * half_size_x, +1 * half_size_y, +1 * half_size_z });
+	points.push_back(Vector3D{ -1 * half_size_x, +1 * half_size_y, +1 * half_size_z });
+	points.push_back(Vector3D{ -1 * half_size_x, -1 * half_size_y, +1 * half_size_z });
+	points.push_back(Vector3D{ +1 * half_size_x, -1 * half_size_y, +1 * half_size_z });
+									 								  
+	points.push_back(Vector3D{ +1 * half_size_x, +1 * half_size_y, -1 * half_size_z });
+	points.push_back(Vector3D{ -1 * half_size_x, +1 * half_size_y, -1 * half_size_z });
+	points.push_back(Vector3D{ -1 * half_size_x, -1 * half_size_y, -1 * half_size_z });
+	points.push_back(Vector3D{ +1 * half_size_x, -1 * half_size_y, -1 * half_size_z });
 
-	MoveToEx(canvas.canvas_device, rotated_corners[0].x, rotated_corners[0].y, &canvas.LastDrawPosition);
-	LineTo(canvas.canvas_device, rotated_corners[4].x, rotated_corners[4].y);
-	MoveToEx(canvas.canvas_device, rotated_corners[1].x, rotated_corners[1].y, &canvas.LastDrawPosition);
-	LineTo(canvas.canvas_device, rotated_corners[5].x, rotated_corners[5].y);
-	MoveToEx(canvas.canvas_device, rotated_corners[2].x, rotated_corners[2].y, &canvas.LastDrawPosition);
-	LineTo(canvas.canvas_device, rotated_corners[6].x, rotated_corners[6].y);
-	MoveToEx(canvas.canvas_device, rotated_corners[3].x, rotated_corners[3].y, &canvas.LastDrawPosition);
-	LineTo(canvas.canvas_device, rotated_corners[7].x, rotated_corners[7].y);
+	std::vector<Vector3D> rotatedPoints;
+	for (auto point : points)
+	{
+		rotatedPoints.push_back(point.GetRotatedVector(rotation) + location);
+	}
 
+	Line line1(rotatedPoints[0], rotatedPoints[1]);
+	Line line2(rotatedPoints[1], rotatedPoints[2]);
+	Line line3(rotatedPoints[2], rotatedPoints[3]);
+	Line line4(rotatedPoints[3], rotatedPoints[0]);
+
+	Line line5(rotatedPoints[4], rotatedPoints[5]);
+	Line line6(rotatedPoints[5], rotatedPoints[6]);
+	Line line7(rotatedPoints[6], rotatedPoints[7]);
+	Line line8(rotatedPoints[7], rotatedPoints[4]);
+
+	Line line9(rotatedPoints[0], rotatedPoints[4]);
+	Line line10(rotatedPoints[1], rotatedPoints[5]);
+	Line line11(rotatedPoints[2], rotatedPoints[6]);
+	Line line12(rotatedPoints[3], rotatedPoints[7]);
+
+	line1.Draw(canvas);
+	line2.Draw(canvas);
+	line3.Draw(canvas);
+	line4.Draw(canvas);
+
+	line5.Draw(canvas);
+	line6.Draw(canvas);
+	line7.Draw(canvas);
+	line8.Draw(canvas);
+
+	line9.Draw(canvas);
+	line10.Draw(canvas);
+	line11.Draw(canvas);
+	line12.Draw(canvas);
 }
 
-void Cube::Rotate(float angle, Axis axis)
+void Cube::Rotate(Vector3D rotator)
 {
-	switch (axis)
-	{
-	case Axis::X:
-		rotation_x += angle;
-		break;
-	case Axis::Y:
-		rotation_y += angle;
-		break;
-	case Axis::Z:
-		rotation_z += angle;
-		break;
-	}
+	rotation = rotation + rotator;
+}
 
-	const Vector3D offset = center;
-	angle = deg_to_radians(angle);
+void Cube::Move(Vector3D offset)
+{
+	location = location + offset;
+}
 
-	rotated_corners.insert(rotated_corners.begin(), corners.begin(), corners.end());
-
-	for (auto& corner : rotated_corners)
-	{
-		corner = corner - offset;
-		corner = corner.GetRotatedVector(rotation_x, Axis::Z);
-		corner = corner.GetRotatedVector(rotation_y, Axis::Y);
-		corner = corner.GetRotatedVector(rotation_z, Axis::Z);
-		corner = corner + offset;
-	}
+void Cube::SetScale(Vector3D newScale)
+{
+	scale = newScale;
 }

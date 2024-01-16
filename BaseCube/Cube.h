@@ -4,18 +4,17 @@
 
 class Cube : public Shape
 {
-	std::vector<Vector3D> corners;
-	std::vector<Vector3D> rotated_corners;
-	Vector3D center;
-	int size;
-	float rotation_x;
-	float rotation_y;
-	float rotation_z;
+	Vector3D location;
+	Vector3D rotation;
+	Vector3D scale;
 
 public:
 	Cube(Vector3D center, int size);
 
 	void Draw(class Canvas canvas) override;
-	void Rotate(float angle, Axis axis);
+	void Rotate(Vector3D rotator) override;
+	void Move(Vector3D offset) override;
+
+	void SetScale(Vector3D newScale);
 };
 
